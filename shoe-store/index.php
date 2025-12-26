@@ -1,16 +1,12 @@
 <?php
-// index.php - ОБНОВЛЕННАЯ ВЕРСИЯ С ОБРАБОТКОЙ ОШИБОК
 
-// Включим отображение ошибок для отладки
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Создаем константы если config.php еще не готов
 if (!defined('SITE_NAME')) {
     define('SITE_NAME', 'Магазин обуви');
 }
 
-// Проверяем существование базы данных
 $dbFile = __DIR__ . '/database.sqlite';
 
 if (!file_exists($dbFile)) {
@@ -21,18 +17,16 @@ if (!file_exists($dbFile)) {
         <p>
             <a href='quick_setup.php' style='display: inline-block; margin: 10px; padding: 12px 24px; 
                background: #007bff; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;'>
-               🚀 Быстрая настройка
+                Быстрая настройка
             </a>
         </p>
     </div>");
 }
 
 try {
-    // Подключаемся к базе данных напрямую
     $db = new PDO('sqlite:' . $dbFile);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    // Проверяем существование таблицы products
     $tableCheck = $db->query("SELECT name FROM sqlite_master WHERE type='table' AND name='products'")->fetch();
     
     if (!$tableCheck) {
@@ -49,7 +43,6 @@ try {
         </div>");
     }
     
-    // Получаем товары
     $stmt = $db->query("
         SELECT p.*, 
                (SELECT image_url FROM product_images WHERE product_id = p.id AND is_main = 1 LIMIT 1) as main_image 
@@ -60,12 +53,10 @@ try {
     ");
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Получаем категории
     $stmt = $db->query("SELECT DISTINCT category FROM products WHERE category IS NOT NULL ORDER BY category");
     $categories = $stmt->fetchAll(PDO::FETCH_COLUMN);
     
 } catch (PDOException $e) {
-    // Показываем понятное сообщение об ошибке
     if (strpos($e->getMessage(), 'no such table') !== false) {
         die("<div style='padding: 40px; text-align: center; font-family: Arial, sans-serif;'>
             <h2 style='color: #dc3545;'>Ошибка базы данных</h2>
